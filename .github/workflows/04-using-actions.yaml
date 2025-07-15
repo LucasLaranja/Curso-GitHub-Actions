@@ -5,6 +5,12 @@ on: push
 jobs:
     build:
         runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
+            - name: Printing Folders
+              run: ls
 
+        # 0. checar o código no repositório
         # 1. instalar dependências
         # 2. executar testes de automação
