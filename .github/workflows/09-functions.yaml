@@ -1,0 +1,58 @@
+name: 09 - Using Functions
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  echo1:
+    runs-on: ubuntu-latest
+    steps:
+      # Etapa 1 - Exibe o título da Pull Request
+      - name: Print PR title
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "PR title: ${{ github.event.pull_request.title }}"
+
+      # Etapa 2 - Exibe os labels da PR como JSON formatado
+      - name: Print PR labels
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "PR Labels:"
+          cat <<EOF
+          ${{ toJSON(github.event.pull_request.labels) }}
+          EOF
+
+      # Etapa 3 - Executa se PR falhou ou o título contém "fix"
+      - name: Bug step
+        if: github.event_name == 'pull_request' && failure() && !cancelled() && contains(github.event.pull_request.title, 'fix')
+        run: echo "I am a bug fix"
+
+      # Etapa 4 - Espera 20 segundos (pra dar tempo de cancelar)
+      - name: Sleep for 20 seconds
+        run: sleep 20
+
+      # Etapa 5 - Falha intencionalmente
+      - name: Failing step
+        run: exit 1
+
+      # Etapa 6 - Executa apenas se etapas anteriores tiverem sucesso
+      - name: I will be skipped
+        if: success()
+        run: echo "I will print if previous steps succeed."
+
+      # Etapa 7 - Executa se qualquer etapa anterior falhar
+      - name: I will execute
+        if: failure()
+        run: echo "I will print if any previous step fails."
+
+      # Etapa 8 - Executa se não for cancelado
+      - name: I will always print, except when the workflow is cancelled
+        if: ${{ !cancelled() }}
+        run: echo "I will always print, except when the workflow is cancelled."
+
+      # Etapa 9 - Executa apenas se o workflow for cancelado
+      - name: I will execute when cancelled
+        if: ${{ cancelled() }}
+        run: echo "This only runs if the workflow was cancelled."
+
